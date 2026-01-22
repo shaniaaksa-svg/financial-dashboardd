@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Performance Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orange: #F97316;
+            --orange-light: #FB923C;
+            --orange-dark: #EA580C;
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --bg-card: #2a2a2a;
+            --bg-hover: #333333;
+            --border: #3a3a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6b6b6b;
+            --success: #22C55E;
+            --warning: #EAB308;
+            --danger: #EF4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 48px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .header-right {
+            text-align: right;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .tab-navigation {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            margin-bottom: -1px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--orange);
+            border-bottom-color: var(--orange);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-value.success { color: var(--orange); }
+        .stat-value.revenue { color: var(--orange); }
+
+        .legend {
+            display: flex;
+            justify-content: flex-end;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.green { background: var(--success); }
+        .legend-dot.yellow { background: var(--warning); }
+        .legend-dot.red { background: var(--danger); }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .table-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 16px 20px;
+            text-align: left;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        
+        tbody tr {
+            transition: background 0.15s ease;
+        }
+        
+        tbody tr:hover { background: var(--bg-hover); }
+
+        .rate-high { color: var(--success); }
+        .rate-mid { color: var(--warning); }
+        .rate-low { color: var(--danger); }
+
+        .total-row { background: var(--bg-secondary); }
+        .total-row td {
+            color: var(--orange);
+            font-weight: 600;
+        }
+
+        .quarterly-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+
+        .quarter-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .quarter-label {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .quarter-revenue {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--orange);
+            margin-bottom: 4px;
+        }
+
+        .quarter-jobs {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .expand-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .expand-btn {
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .expand-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .month-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .month-tab {
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: none;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .month-tab:hover {
+            background: var(--orange);
+            color: var(--text-primary);
+        }
+
+        .month-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .month-header {
+            padding: 20px 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s ease;
+        }
+
+        .month-header:hover { background: var(--bg-hover); }
+
+        .month-title {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .month-toggle {
+            color: var(--orange);
+            transition: transform 0.3s ease;
+            font-size: 0.7rem;
+        }
+
+        .month-toggle.expanded { transform: rotate(180deg); }
+
+        .month-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            padding: 20px 24px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+        }
+
+        .month-stat { text-align: center; }
+
+        .month-stat-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .month-stat-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .month-stat-value.success { color: var(--orange); }
+        .month-stat-value.revenue { color: var(--orange); }
+
+        .month-content {
+            display: none;
+            padding: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .month-content.expanded { display: block; }
+
+        .bdr-card { border-left: 3px solid var(--orange); }
+
+        .agent-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .agent-myles { background: rgba(249, 115, 22, 0.2); color: var(--orange-light); }
+        .agent-eric { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .agent-piercyn { background: rgba(251, 146, 60, 0.2); color: #FDBA74; }
+        .agent-colin { background: rgba(234, 179, 8, 0.2); color: var(--warning); }
+        .agent-shania { background: rgba(239, 68, 68, 0.2); color: #FCA5A5; }
+        .agent-levi { background: rgba(255, 255, 255, 0.1); color: var(--text-secondary); }
+
+        h4 {
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 1200px) {
+            .stats-grid, .quarterly-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 24px; }
+            h1 { font-size: 1.25rem; }
+            .stats-grid, .quarterly-grid { grid-template-columns: 1fr; }
+            .stat-value { font-size: 1.5rem; }
+            .month-stats { grid-template-columns: repeat(3, 1fr); }
+            header { flex-direction: column; gap: 16px; }
+            .header-right { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Financial Performance Dashboard</h1>
+            <div class="header-right">January — December 2025</div>
+        </header>
+        
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('yearly')">Yearly Overview</button>
+            <button class="tab-btn" onclick="switchTab('monthly')">Monthly Breakdown</button>
+            <button class="tab-btn" onclick="switchTab('bdr')">Sales Metrics</button>
+        </div>
+
+        <div id="yearly" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">Total Scheduled</div><div class="stat-value">2,597</div></div>
+                <div class="stat-card"><div class="stat-label">Jobs Suspended</div><div class="stat-value">481</div></div>
+                <div class="stat-card"><div class="stat-label">Jobs Completed</div><div class="stat-value success">2,116</div></div>
+                <div class="stat-card"><div class="stat-label">Completion Rate</div><div class="stat-value success">81.5%</div></div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><span class="legend-dot green"></span>≥85% Completion</div>
+                <div class="legend-item"><span class="legend-dot yellow"></span>70-84%</div>
+                <div class="legend-item"><span class="legend-dot red"></span>&lt;70%</div>
+            </div>
+
+            <h2 class="section-title">Annual Performance by Truck</h2>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Scheduled</th><th>Completed</th><th>Rate</th><th>Revenue</th><th>Pay</th><th>Margin</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Truck 1</strong></td><td>Various (BJ, Junk, Chuck, Levi)</td><td>$18.50-$23.00</td><td>430</td><td>380</td><td class="rate-high">88.4%</td><td>—</td><td>—</td><td>—</td></tr>
+                        <tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>330</td><td>267</td><td class="rate-mid">80.9%</td><td>—</td><td>—</td><td>—</td></tr>
+                        <tr><td><strong>Truck 3</strong></td><td>Various (Eli, Sebastian, Erik)</td><td>$18.00-$22.00</td><td>299</td><td>259</td><td class="rate-high">86.6%</td><td>—</td><td>—</td><td>—</td></tr>
+                        <tr><td><strong>Truck 4</strong></td><td>Eugene & Various (DJ, Sebastian)</td><td>$24.50 / $18.50</td><td>455</td><td>345</td><td class="rate-mid">75.8%</td><td>—</td><td>—</td><td>—</td></tr>
+                        <tr><td><strong>Truck 5</strong></td><td>Larry & Diego (+ Various)</td><td>$18.50 / $22.00</td><td>321</td><td>261</td><td class="rate-mid">81.3%</td><td>—</td><td>—</td><td>—</td></tr>
+                        <tr><td><strong>Truck 6</strong></td><td>Various (Erik, Carlos, German)</td><td>$22.00</td><td>218</td><td>172</td><td class="rate-mid">78.9%</td><td>—</td><td>—</td><td>—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="section-title">Quarterly Revenue</h2>
+            <div class="quarterly-grid">
+                <div class="quarter-card"><div class="quarter-label">Q1 (Jan-Mar)</div><div class="quarter-revenue">$232,281</div><div class="quarter-jobs">306 jobs completed</div></div>
+                <div class="quarter-card"><div class="quarter-label">Q2 (Apr-Jun)</div><div class="quarter-revenue">$317,639</div><div class="quarter-jobs">435 jobs completed</div></div>
+                <div class="quarter-card"><div class="quarter-label">Q3 (Jul-Sep)</div><div class="quarter-revenue">$404,197</div><div class="quarter-jobs">503 jobs completed</div></div>
+                <div class="quarter-card"><div class="quarter-label">Q4 (Oct-Dec)</div><div class="quarter-revenue">$385,783</div><div class="quarter-jobs">544 jobs completed</div></div>
+            </div>
+        </div>
+        <div id="monthly" class="tab-content">
+            <div class="expand-controls">
+                <button class="expand-btn" onclick="expandAll()">Expand All</button>
+                <button class="expand-btn" onclick="collapseAll()">Collapse All</button>
+            </div>
+            <div class="month-tabs">
+                <span class="month-tab" onclick="scrollToMonth('jan')">Jan</span>
+                <span class="month-tab" onclick="scrollToMonth('feb')">Feb</span>
+                <span class="month-tab" onclick="scrollToMonth('mar')">Mar</span>
+                <span class="month-tab" onclick="scrollToMonth('apr')">Apr</span>
+                <span class="month-tab" onclick="scrollToMonth('may')">May</span>
+                <span class="month-tab" onclick="scrollToMonth('jun')">Jun</span>
+                <span class="month-tab" onclick="scrollToMonth('jul')">Jul</span>
+                <span class="month-tab" onclick="scrollToMonth('aug')">Aug</span>
+                <span class="month-tab" onclick="scrollToMonth('sep')">Sep</span>
+                <span class="month-tab" onclick="scrollToMonth('oct')">Oct</span>
+                <span class="month-tab" onclick="scrollToMonth('nov')">Nov</span>
+                <span class="month-tab" onclick="scrollToMonth('dec')">Dec</span>
+            </div>
+
+            <div class="month-section" id="jan"><div class="month-header" onclick="toggleMonth('jan')"><span class="month-title"><span class="month-toggle" id="jan-toggle">▼</span> January 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">126</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">11</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">115</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value success">91.3%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$84,830</div></div></div><div class="month-content" id="jan-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>BJ & Chuck</td><td>— / $23.00</td><td>43</td><td>42</td><td class="rate-high">97.7%</td><td>$30,555</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>33</td><td>28</td><td class="rate-mid">84.8%</td><td>$21,298</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & Erik</td><td>$24.50 / $22.00</td><td>50</td><td>45</td><td class="rate-high">90.0%</td><td>$32,978</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="feb"><div class="month-header" onclick="toggleMonth('feb')"><span class="month-title"><span class="month-toggle" id="feb-toggle">▼</span> February 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">94</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">13</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">81</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value success">86.2%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$63,469</div></div></div><div class="month-content" id="feb-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>BJ & Chuck</td><td>— / $23.00</td><td>35</td><td>30</td><td class="rate-high">85.7%</td><td>$20,827</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>25</td><td>22</td><td class="rate-high">88.0%</td><td>$16,740</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & Erik</td><td>$24.50 / $22.00</td><td>34</td><td>29</td><td class="rate-high">85.3%</td><td>$25,902</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="mar"><div class="month-header" onclick="toggleMonth('mar')"><span class="month-title"><span class="month-toggle" id="mar-toggle">▼</span> March 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">139</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">29</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">110</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value">79.1%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$83,982</div></div></div><div class="month-content" id="mar-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>BJ & Chuck</td><td>— / $23.00</td><td>46</td><td>41</td><td class="rate-high">89.1%</td><td>$27,456</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>39</td><td>30</td><td class="rate-mid">76.9%</td><td>$22,206</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & Erik</td><td>$24.50 / $22.00</td><td>54</td><td>39</td><td class="rate-mid">72.2%</td><td>$34,320</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="apr"><div class="month-header" onclick="toggleMonth('apr')"><span class="month-title"><span class="month-toggle" id="apr-toggle">▼</span> April 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">122</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">7</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">115</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value success">94.3%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$90,638</div></div></div><div class="month-content" id="apr-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>BJ & Chuck</td><td>— / $23.00</td><td>43</td><td>40</td><td class="rate-high">93.0%</td><td>$31,419</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>26</td><td>25</td><td class="rate-high">96.2%</td><td>$20,432</td></tr><tr><td><strong>Truck 3</strong></td><td>Erik & Sebastian</td><td>$22.00 / $18.00</td><td>12</td><td>11</td><td class="rate-high">91.7%</td><td>$5,359</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & DJ</td><td>— / $18.50</td><td>41</td><td>39</td><td class="rate-high">95.1%</td><td>$16,600</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="may"><div class="month-header" onclick="toggleMonth('may')"><span class="month-title"><span class="month-toggle" id="may-toggle">▼</span> May 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">171</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">17</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">154</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value success">90.1%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$97,812</div></div></div><div class="month-content" id="may-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>Chuck & BJ</td><td>— / $23.00</td><td>34</td><td>30</td><td class="rate-high">88.2%</td><td>$18,682</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>25</td><td>21</td><td class="rate-mid">84.0%</td><td>$15,914</td></tr><tr><td><strong>Truck 3</strong></td><td>Erik & Sebastian</td><td>$22.00 / $18.00</td><td>34</td><td>33</td><td class="rate-high">97.1%</td><td>$9,866</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & DJ</td><td>$24.50 / $18.50</td><td>25</td><td>19</td><td class="rate-mid">76.0%</td><td>$16,134</td></tr><tr><td><strong>Truck 5</strong></td><td>Matt, Carlos & Diego</td><td>— / $22.00</td><td>36</td><td>36</td><td class="rate-high">100.0%</td><td>$13,751</td></tr><tr><td><strong>Truck 6</strong></td><td>Joe</td><td>—</td><td>17</td><td>15</td><td class="rate-high">88.2%</td><td>$7,243</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="jun"><div class="month-header" onclick="toggleMonth('jun')"><span class="month-title"><span class="month-toggle" id="jun-toggle">▼</span> June 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">203</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">37</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">166</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value">81.8%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$129,189</div></div></div><div class="month-content" id="jun-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>BJ & Chuck</td><td>—</td><td>52</td><td>44</td><td class="rate-mid">84.6%</td><td>$29,755</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>39</td><td>28</td><td class="rate-mid">71.8%</td><td>$19,804</td></tr><tr><td><strong>Truck 3</strong></td><td>Eli & DJ</td><td>— / $18.50</td><td>15</td><td>13</td><td class="rate-high">86.7%</td><td>$16,196</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & Sebastian</td><td>$24.50 / $18.00</td><td>46</td><td>39</td><td class="rate-mid">84.8%</td><td>$33,458</td></tr><tr><td><strong>Truck 5</strong></td><td>Erik, Carlos & Diego</td><td>$22.00 / —</td><td>51</td><td>42</td><td class="rate-mid">82.4%</td><td>$26,644</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="jul"><div class="month-header" onclick="toggleMonth('jul')"><span class="month-title"><span class="month-toggle" id="jul-toggle">▼</span> July 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">242</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">50</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">192</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value">79.3%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$149,862</div></div></div><div class="month-content" id="jul-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>Chuck & BJ</td><td>— / $23.00</td><td>49</td><td>43</td><td class="rate-high">87.8%</td><td>$28,472</td></tr><tr><td><strong>Truck 2</strong></td><td>Bryan & Brady</td><td>$20.50 / $23.00</td><td>30</td><td>24</td><td class="rate-mid">80.0%</td><td>$22,350</td></tr><tr><td><strong>Truck 3</strong></td><td>Eli & DJ</td><td>— / $18.50</td><td>38</td><td>30</td><td class="rate-mid">78.9%</td><td>$20,327</td></tr><tr><td><strong>Truck 4</strong></td><td>Sebastian & Eugene</td><td>$18.00 / $24.50</td><td>55</td><td>45</td><td class="rate-mid">81.8%</td><td>$37,539</td></tr><tr><td><strong>Truck 5</strong></td><td>Erik, Carlos, Diego & Larry</td><td>$22.00 / $18.50</td><td>42</td><td>33</td><td class="rate-mid">78.6%</td><td>$46,132</td></tr><tr><td><strong>Truck 6</strong></td><td>Erik & Autumn</td><td>$22.00 / —</td><td>28</td><td>17</td><td class="rate-low">60.7%</td><td>$8,648</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="aug"><div class="month-header" onclick="toggleMonth('aug')"><span class="month-title"><span class="month-toggle" id="aug-toggle">▼</span> August 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">218</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">57</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">161</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value">73.9%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$128,703</div></div></div><div class="month-content" id="aug-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>BJ</td><td>$23.00</td><td>35</td><td>25</td><td class="rate-mid">71.4%</td><td>$8,400</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>29</td><td>25</td><td class="rate-high">86.2%</td><td>$16,777</td></tr><tr><td><strong>Truck 3</strong></td><td>Eli & DJ</td><td>$22.00 / $18.50</td><td>39</td><td>28</td><td class="rate-mid">71.8%</td><td>$19,970</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & Sebastian</td><td>$24.50 / $18.00</td><td>35</td><td>22</td><td class="rate-low">62.9%</td><td>$18,891</td></tr><tr><td><strong>Truck 5</strong></td><td>Larry & Diego</td><td>$18.50 / $22.00</td><td>39</td><td>32</td><td class="rate-mid">82.1%</td><td>$20,024</td></tr><tr><td><strong>Truck 6</strong></td><td>Erik, Carlos & Austin</td><td>$22.00 / —</td><td>41</td><td>29</td><td class="rate-mid">70.7%</td><td>$28,508</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="sep"><div class="month-header" onclick="toggleMonth('sep')"><span class="month-title"><span class="month-toggle" id="sep-toggle">▼</span> September 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">194</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">44</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">150</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value">77.3%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$125,632</div></div></div><div class="month-content" id="sep-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>Levi & German</td><td>$18.50 / $18.00</td><td>10</td><td>0</td><td class="rate-low">0.0%</td><td>$19,120</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>29</td><td>27</td><td class="rate-high">93.1%</td><td>$18,800</td></tr><tr><td><strong>Truck 3</strong></td><td>Eli & Sebastian</td><td>$22.00 / $18.00</td><td>42</td><td>38</td><td class="rate-high">90.5%</td><td>$18,329</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & DJ</td><td>$24.50 / $18.50</td><td>43</td><td>30</td><td class="rate-low">69.8%</td><td>$24,935</td></tr><tr><td><strong>Truck 5</strong></td><td>Larry & Diego</td><td>$18.50 / $22.00</td><td>36</td><td>28</td><td class="rate-mid">77.8%</td><td>$14,500</td></tr><tr><td><strong>Truck 6</strong></td><td>Erik, Carlos & BJ</td><td>$22.00 / $23.00</td><td>34</td><td>27</td><td class="rate-mid">79.4%</td><td>$19,304</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="oct"><div class="month-header" onclick="toggleMonth('oct')"><span class="month-title"><span class="month-toggle" id="oct-toggle">▼</span> October 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">232</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">36</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">196</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value">84.5%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$137,280</div></div></div><div class="month-content" id="oct-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>BJ & Austin</td><td>$23.00 / —</td><td>34</td><td>29</td><td class="rate-high">85.3%</td><td>$14,175</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>33</td><td>28</td><td class="rate-mid">84.8%</td><td>$22,501</td></tr><tr><td><strong>Truck 3</strong></td><td>Eli & Sebastian</td><td>$22.00 / $18.00</td><td>45</td><td>43</td><td class="rate-high">95.6%</td><td>$27,368</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & DJ</td><td>$24.50 / $18.50</td><td>46</td><td>34</td><td class="rate-mid">73.9%</td><td>$27,436</td></tr><tr><td><strong>Truck 5</strong></td><td>Larry & Diego</td><td>$18.50 / $22.00</td><td>29</td><td>21</td><td class="rate-mid">72.4%</td><td>$12,515</td></tr><tr><td><strong>Truck 6</strong></td><td>German & Carlos</td><td>$18.00 / $22.00</td><td>45</td><td>41</td><td class="rate-high">91.1%</td><td>$28,171</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="nov"><div class="month-header" onclick="toggleMonth('nov')"><span class="month-title"><span class="month-toggle" id="nov-toggle">▼</span> November 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">209</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">42</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">167</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value">79.9%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$119,864</div></div></div><div class="month-content" id="nov-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>BJ & Austin</td><td>$23.00 / —</td><td>33</td><td>28</td><td class="rate-mid">84.8%</td><td>$14,521</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>28</td><td>20</td><td class="rate-mid">71.4%</td><td>$15,458</td></tr><tr><td><strong>Truck 3</strong></td><td>Eli & Sebastian</td><td>$22.00 / $18.00</td><td>36</td><td>31</td><td class="rate-high">86.1%</td><td>$24,142</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & DJ</td><td>$24.50 / $18.50</td><td>41</td><td>30</td><td class="rate-mid">73.2%</td><td>$22,853</td></tr><tr><td><strong>Truck 5</strong></td><td>Larry & Diego</td><td>$18.50 / $22.00</td><td>37</td><td>33</td><td class="rate-high">89.2%</td><td>$18,966</td></tr><tr><td><strong>Truck 6</strong></td><td>German & Carlos</td><td>$18.00 / $22.00</td><td>34</td><td>25</td><td class="rate-mid">73.5%</td><td>$21,110</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="dec"><div class="month-header" onclick="toggleMonth('dec')"><span class="month-title"><span class="month-toggle" id="dec-toggle">▼</span> December 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">229</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">48</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">181</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value">79.0%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$128,639</div></div></div><div class="month-content" id="dec-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>BJ & Austin</td><td>$23.00 / —</td><td>33</td><td>28</td><td class="rate-mid">84.8%</td><td>$17,424</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>28</td><td>19</td><td class="rate-low">67.9%</td><td>$11,018</td></tr><tr><td><strong>Truck 3</strong></td><td>Eli & Sebastian</td><td>$22.00 / $18.00</td><td>40</td><td>30</td><td class="rate-mid">75.0%</td><td>$18,987</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & DJ</td><td>$24.50 / $18.50</td><td>44</td><td>33</td><td class="rate-mid">75.0%</td><td>$22,116</td></tr><tr><td><strong>Truck 5</strong></td><td>Larry & Diego</td><td>$18.50 / $22.00</td><td>41</td><td>36</td><td class="rate-high">87.8%</td><td>$19,408</td></tr><tr><td><strong>Truck 6</strong></td><td>German & Carlos</td><td>$18.00 / $22.00</td><td>43</td><td>35</td><td class="rate-mid">81.4%</td><td>$39,086</td></tr></tbody></table></div></div>
+        </div>
+        <div id="bdr" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card bdr-card"><div class="stat-label">Total Calls (Sep-Dec)</div><div class="stat-value">2,793</div></div>
+                <div class="stat-card bdr-card"><div class="stat-label">Contracts Closed</div><div class="stat-value success">85+</div></div>
+                <div class="stat-card bdr-card"><div class="stat-label">Total ARR Added</div><div class="stat-value revenue">$250,000+</div></div>
+                <div class="stat-card bdr-card"><div class="stat-label">Avg Answer Rate</div><div class="stat-value">80.8%</div></div>
+            </div>
+
+            <h2 class="section-title">Setter Performance</h2>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Setter</th><th>Contracts</th><th>Total ARR</th><th>Avg ARR/Deal</th><th>Top Category</th></tr></thead>
+                    <tbody>
+                        <tr><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>45</td><td>$178,522</td><td>$3,967</td><td>Restaurant/Bar</td></tr>
+                        <tr><td><span class="agent-badge agent-myles">Myles</span></td><td>22</td><td>$47,614</td><td>$2,164</td><td>Restaurant/Bar</td></tr>
+                        <tr><td><span class="agent-badge agent-colin">Colin</span></td><td>18</td><td>$53,948</td><td>$2,997</td><td>Restaurant/Bar</td></tr>
+                        <tr><td><span class="agent-badge agent-eric">Eric</span></td><td>12</td><td>$21,325</td><td>$1,777</td><td>Restaurant/Bar</td></tr>
+                        <tr><td><span class="agent-badge agent-shania">Shania</span></td><td>2</td><td>$6,378</td><td>$3,189</td><td>Mixed</td></tr>
+                        <tr><td><span class="agent-badge agent-levi">Levi</span></td><td>2</td><td>$605</td><td>$303</td><td>Mixed</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="expand-controls">
+                <button class="expand-btn" onclick="expandAllBdr()">Expand All</button>
+                <button class="expand-btn" onclick="collapseAllBdr()">Collapse All</button>
+            </div>
+            <div class="month-tabs">
+                <span class="month-tab" onclick="scrollToBdrMonth('bdr-sep')">Sep</span>
+                <span class="month-tab" onclick="scrollToBdrMonth('bdr-oct')">Oct</span>
+                <span class="month-tab" onclick="scrollToBdrMonth('bdr-nov')">Nov</span>
+                <span class="month-tab" onclick="scrollToBdrMonth('bdr-dec')">Dec</span>
+            </div>
+
+            <div class="month-section" id="bdr-sep"><div class="month-header" onclick="toggleBdrMonth('bdr-sep')"><span class="month-title"><span class="month-toggle" id="bdr-sep-toggle">▼</span> September 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">112</div></div><div class="month-stat"><div class="month-stat-label">Answered</div><div class="month-stat-value success">81.25%</div></div><div class="month-stat"><div class="month-stat-label">Contracts</div><div class="month-stat-value">1</div></div><div class="month-stat"><div class="month-stat-label">ARR Added</div><div class="month-stat-value revenue">$988</div></div><div class="month-stat"><div class="month-stat-label">Avg Duration</div><div class="month-stat-value">1m 27s</div></div></div><div class="month-content" id="bdr-sep-content"><h4>Call Activity</h4><table><thead><tr><th>Agent</th><th>Calls</th><th>Avg Duration</th><th>Leads</th><th>Contracts</th><th>ARR</th></tr></thead><tbody><tr><td><span class="agent-badge agent-myles">Myles Marinez</span></td><td>108</td><td>1m 28s</td><td>93</td><td>0</td><td>$0</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>4</td><td>56s</td><td>2</td><td>0</td><td>$0</td></tr></tbody></table><h4 style="margin-top:24px">Contracts</h4><table><thead><tr><th>Account</th><th>Category</th><th>Set By</th><th>Closer</th><th>ARR</th></tr></thead><tbody><tr><td>Star Development</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Myles</td><td>$988</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="bdr-oct"><div class="month-header" onclick="toggleBdrMonth('bdr-oct')"><span class="month-title"><span class="month-toggle" id="bdr-oct-toggle">▼</span> October 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">1,164</div></div><div class="month-stat"><div class="month-stat-label">Answered</div><div class="month-stat-value success">~90%</div></div><div class="month-stat"><div class="month-stat-label">Contracts</div><div class="month-stat-value">16</div></div><div class="month-stat"><div class="month-stat-label">ARR Added</div><div class="month-stat-value revenue">$14,329</div></div><div class="month-stat"><div class="month-stat-label">Avg Duration</div><div class="month-stat-value">41s</div></div></div><div class="month-content" id="bdr-oct-content"><h4>Call Activity</h4><table><thead><tr><th>Agent</th><th>Calls</th><th>Avg Duration</th><th>Leads</th><th>Contracts</th><th>ARR</th></tr></thead><tbody><tr><td><span class="agent-badge agent-myles">Myles Marinez</span></td><td>754</td><td>30s</td><td>398</td><td>12</td><td>$9,527</td></tr><tr><td><span class="agent-badge agent-eric">Eric Mcdaniel</span></td><td>282</td><td>1m 11s</td><td>219</td><td>1</td><td>$502</td></tr><tr><td><span class="agent-badge agent-shania">Shania Abbasi</span></td><td>56</td><td>26s</td><td>49</td><td>0</td><td>$0</td></tr><tr><td><span class="agent-badge agent-piercyn">Morrena Torres</span></td><td>28</td><td>32s</td><td>25</td><td>0</td><td>$0</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>21</td><td>50s</td><td>17</td><td>0</td><td>$0</td></tr></tbody></table><h4 style="margin-top:24px">Contracts</h4><table><thead><tr><th>Account</th><th>Category</th><th>Set By</th><th>Closer</th><th>ARR</th></tr></thead><tbody><tr><td>White's Foodliner</td><td>Grocery</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$1,166</td></tr><tr><td>Butler One Stop</td><td>C-Store</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$515</td></tr><tr><td>Cici's Pizza - Roe</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$2,270</td></tr><tr><td>Lee's Summit Place</td><td>Retirement</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$980</td></tr><tr><td>Alpine Breeze</td><td>Retirement</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$980</td></tr><tr><td>Tiki Taco - Shawnee</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Eric</td><td>$2,340</td></tr><tr><td>Pizza Tascio (5 loc)</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$2,186</td></tr><tr><td>American Legion 499</td><td>Non-Profit</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$502</td></tr><tr><td>Sri's Kitchen</td><td>Food Truck</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Levi</td><td>$175</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="bdr-nov"><div class="month-header" onclick="toggleBdrMonth('bdr-nov')"><span class="month-title"><span class="month-toggle" id="bdr-nov-toggle">▼</span> November 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">1,057</div></div><div class="month-stat"><div class="month-stat-label">Answered</div><div class="month-stat-value">75.97%</div></div><div class="month-stat"><div class="month-stat-label">Contracts</div><div class="month-stat-value">11</div></div><div class="month-stat"><div class="month-stat-label">ARR Added</div><div class="month-stat-value revenue">$18,770</div></div><div class="month-stat"><div class="month-stat-label">Avg Duration</div><div class="month-stat-value">50s</div></div></div><div class="month-content" id="bdr-nov-content"><h4>Call Activity</h4><table><thead><tr><th>Agent</th><th>Calls</th><th>Avg Duration</th><th>Leads</th><th>Contracts</th><th>ARR</th></tr></thead><tbody><tr><td><span class="agent-badge agent-eric">Eric Mcdaniel</span></td><td>445</td><td>46s</td><td>344</td><td>2</td><td>$2,238</td></tr><tr><td><span class="agent-badge agent-myles">Myles Marinez</span></td><td>255</td><td>1m 1s</td><td>219</td><td>7</td><td>$13,226</td></tr><tr><td><span class="agent-badge agent-piercyn">Morrena Torres</span></td><td>194</td><td>50s</td><td>115</td><td>0</td><td>$0</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>144</td><td>46s</td><td>108</td><td>0</td><td>$0</td></tr></tbody></table><h4 style="margin-top:24px">Contracts</h4><table><thead><tr><th>Account</th><th>Category</th><th>Set By</th><th>Closer</th><th>ARR</th></tr></thead><tbody><tr><td>Speedy Corner LLC</td><td>C-Store</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$2,524</td></tr><tr><td>Tim's Pizza</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$1,166</td></tr><tr><td>Oak Pointe of Maryville</td><td>Retirement</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$1,238</td></tr><tr><td>Blue Springs Assembly</td><td>Non-Profit</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$535</td></tr><tr><td>Hope Chapel</td><td>Non-Profit</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$535</td></tr><tr><td>Culvers - Olathe</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$2,140</td></tr><tr><td>Barrio (3 loc)</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Eric</td><td>$5,988</td></tr><tr><td>Koehn Bakery</td><td>Bakery</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$575</td></tr></tbody></table></div></div>
+
+            <div class="month-section" id="bdr-dec"><div class="month-header" onclick="toggleBdrMonth('bdr-dec')"><span class="month-title"><span class="month-toggle" id="bdr-dec-toggle">▼</span> December 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">460</div></div><div class="month-stat"><div class="month-stat-label">Answered</div><div class="month-stat-value success">85.87%</div></div><div class="month-stat"><div class="month-stat-label">Contracts</div><div class="month-stat-value">15</div></div><div class="month-stat"><div class="month-stat-label">ARR Added</div><div class="month-stat-value revenue">$39,000</div></div><div class="month-stat"><div class="month-stat-label">Avg Duration</div><div class="month-stat-value">46s</div></div></div><div class="month-content" id="bdr-dec-content"><h4>Call Activity</h4><table><thead><tr><th>Agent</th><th>Calls</th><th>Avg Duration</th><th>Leads</th><th>Contracts</th><th>ARR</th></tr></thead><tbody><tr><td><span class="agent-badge agent-eric">Eric Mcdaniel</span></td><td>405</td><td>42s</td><td>265</td><td>6</td><td>$11,033</td></tr><tr><td><span class="agent-badge agent-myles">Myles Marinez</span></td><td>42</td><td>1m 25s</td><td>31</td><td>6</td><td>$21,031</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>10</td><td>1m 42s</td><td>8</td><td>0</td><td>$0</td></tr></tbody></table><h4 style="margin-top:24px">Contracts</h4><table><thead><tr><th>Account</th><th>Category</th><th>Set By</th><th>Closer</th><th>ARR</th></tr></thead><tbody><tr><td>Abelardo's - Liberty</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$2,008</td></tr><tr><td>Warrensburg Senior Center</td><td>Retirement</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$731</td></tr><tr><td>Marco's Pizza OP</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$1,418</td></tr><tr><td>Hy-Vee - 135th St</td><td>Grocery</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$12,783</td></tr><tr><td>Cameron Regional Medical</td><td>Hospital</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$1,460</td></tr><tr><td>Holiday Lanes</td><td>Activity</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$1,342</td></tr><tr><td>Sakura</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$2,500</td></tr><tr><td>Lulu's Thai (3 loc)</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$7,020</td></tr><tr><td>Abelardo's - Independence</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$2,008</td></tr><tr><td>Green Dirt on Oak</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$2,920</td></tr><tr><td>Greater Faith Baptist</td><td>Non-Profit</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$571</td></tr></tbody></table></div></div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        function toggleMonth(id) {
+            document.getElementById(id + '-content').classList.toggle('expanded');
+            document.getElementById(id + '-toggle').classList.toggle('expanded');
+        }
+        function toggleBdrMonth(id) {
+            document.getElementById(id + '-content').classList.toggle('expanded');
+            document.getElementById(id + '-toggle').classList.toggle('expanded');
+        }
+        function expandAll() {
+            document.querySelectorAll('#monthly .month-content').forEach(c => c.classList.add('expanded'));
+            document.querySelectorAll('#monthly .month-toggle').forEach(t => t.classList.add('expanded'));
+        }
+        function collapseAll() {
+            document.querySelectorAll('#monthly .month-content').forEach(c => c.classList.remove('expanded'));
+            document.querySelectorAll('#monthly .month-toggle').forEach(t => t.classList.remove('expanded'));
+        }
+        function expandAllBdr() {
+            document.querySelectorAll('#bdr .month-content').forEach(c => c.classList.add('expanded'));
+            document.querySelectorAll('#bdr .month-toggle').forEach(t => t.classList.add('expanded'));
+        }
+        function collapseAllBdr() {
+            document.querySelectorAll('#bdr .month-content').forEach(c => c.classList.remove('expanded'));
+            document.querySelectorAll('#bdr .month-toggle').forEach(t => t.classList.remove('expanded'));
+        }
+        function scrollToMonth(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            document.getElementById(id + '-content').classList.add('expanded');
+            document.getElementById(id + '-toggle').classList.add('expanded');
+        }
+        function scrollToBdrMonth(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            document.getElementById(id + '-content').classList.add('expanded');
+            document.getElementById(id + '-toggle').classList.add('expanded');
+        }
+    </script>
+</body>
+</html>
