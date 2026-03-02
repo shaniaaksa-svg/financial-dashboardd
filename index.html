@@ -65,6 +65,7 @@
             margin-bottom: 40px;
             border-bottom: 1px solid var(--border);
             padding-bottom: 0;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
@@ -100,6 +101,13 @@
             margin-bottom: 48px;
         }
 
+        .stats-grid-5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+
         .stat-card {
             background: var(--bg-card);
             border-radius: 12px;
@@ -123,6 +131,12 @@
 
         .stat-value.success { color: var(--orange); }
         .stat-value.revenue { color: var(--orange); }
+
+        .stat-sub {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 6px;
+        }
 
         .legend {
             display: flex;
@@ -374,6 +388,12 @@
         .agent-colin { background: rgba(234, 179, 8, 0.2); color: var(--warning); }
         .agent-shania { background: rgba(239, 68, 68, 0.2); color: #FCA5A5; }
         .agent-levi { background: rgba(255, 255, 255, 0.1); color: var(--text-secondary); }
+        .agent-morena { background: rgba(168, 85, 247, 0.2); color: #C4B5FD; }
+        .agent-shairah { background: rgba(6, 182, 212, 0.2); color: #67E8F9; }
+        .agent-kamran { background: rgba(16, 185, 129, 0.2); color: #6EE7B7; }
+        .agent-seth { background: rgba(244, 114, 182, 0.2); color: #F9A8D4; }
+        .agent-fady { background: rgba(139, 92, 246, 0.2); color: #A78BFA; }
+        .agent-unknown { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }
 
         h4 {
             color: var(--text-primary);
@@ -382,18 +402,79 @@
             margin-bottom: 16px;
         }
 
+        .no-calls-row td {
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+
+        .funnel-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            margin-bottom: 48px;
+            position: relative;
+        }
+
+        .funnel-step {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 28px 24px;
+            text-align: center;
+            position: relative;
+        }
+
+        .funnel-step::after {
+            content: '→';
+            position: absolute;
+            right: -14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            z-index: 1;
+        }
+
+        .funnel-step:last-child::after { display: none; }
+
+        .funnel-label {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .funnel-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .funnel-value.highlight { color: var(--orange); }
+
+        .funnel-rate {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
         @media (max-width: 1200px) {
-            .stats-grid, .quarterly-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid, .quarterly-grid, .stats-grid-5 { grid-template-columns: repeat(2, 1fr); }
+            .funnel-grid { grid-template-columns: repeat(2, 1fr); }
+            .funnel-step::after { display: none; }
         }
 
         @media (max-width: 768px) {
             .container { padding: 24px; }
             h1 { font-size: 1.25rem; }
-            .stats-grid, .quarterly-grid { grid-template-columns: 1fr; }
+            .stats-grid, .quarterly-grid, .stats-grid-5 { grid-template-columns: 1fr; }
             .stat-value { font-size: 1.5rem; }
             .month-stats { grid-template-columns: repeat(3, 1fr); }
             header { flex-direction: column; gap: 16px; }
             .header-right { text-align: left; }
+            .funnel-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -401,15 +482,17 @@
     <div class="container">
         <header>
             <h1>Financial Performance Dashboard</h1>
-            <div class="header-right">January — December 2025</div>
+            <div class="header-right">January 2025 — February 2026</div>
         </header>
         
         <div class="tab-navigation">
-            <button class="tab-btn active" onclick="switchTab('yearly')">Yearly Overview</button>
-            <button class="tab-btn" onclick="switchTab('monthly')">Monthly Breakdown</button>
-            <button class="tab-btn" onclick="switchTab('bdr')">Sales Metrics</button>
+            <button class="tab-btn active" onclick="switchTab('yearly', this)">Yearly Overview</button>
+            <button class="tab-btn" onclick="switchTab('monthly', this)">Monthly Breakdown</button>
+            <button class="tab-btn" onclick="switchTab('bdr', this)">Sales Metrics</button>
+            <button class="tab-btn" onclick="switchTab('outbound', this)">Outbound Calls</button>
         </div>
 
+        <!-- ==================== YEARLY OVERVIEW ==================== -->
         <div id="yearly" class="tab-content active">
             <div class="stats-grid">
                 <div class="stat-card"><div class="stat-label">Total Scheduled</div><div class="stat-value">2,597</div></div>
@@ -447,6 +530,8 @@
                 <div class="quarter-card"><div class="quarter-label">Q4 (Oct-Dec)</div><div class="quarter-revenue">$385,783</div><div class="quarter-jobs">544 jobs completed</div></div>
             </div>
         </div>
+
+        <!-- ==================== MONTHLY BREAKDOWN ==================== -->
         <div id="monthly" class="tab-content">
             <div class="expand-controls">
                 <button class="expand-btn" onclick="expandAll()">Expand All</button>
@@ -491,6 +576,8 @@
 
             <div class="month-section" id="dec"><div class="month-header" onclick="toggleMonth('dec')"><span class="month-title"><span class="month-toggle" id="dec-toggle">▼</span> December 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Scheduled</div><div class="month-stat-value">229</div></div><div class="month-stat"><div class="month-stat-label">Suspended</div><div class="month-stat-value">48</div></div><div class="month-stat"><div class="month-stat-label">Completed</div><div class="month-stat-value success">181</div></div><div class="month-stat"><div class="month-stat-label">Rate</div><div class="month-stat-value">79.0%</div></div><div class="month-stat"><div class="month-stat-label">Revenue</div><div class="month-stat-value revenue">$128,639</div></div></div><div class="month-content" id="dec-content"><table><thead><tr><th>Truck</th><th>Technicians</th><th>Hourly</th><th>Sched</th><th>Comp</th><th>Rate</th><th>Revenue</th></tr></thead><tbody><tr><td><strong>Truck 1</strong></td><td>BJ & Austin</td><td>$23.00 / —</td><td>33</td><td>28</td><td class="rate-mid">84.8%</td><td>$17,424</td></tr><tr><td><strong>Truck 2</strong></td><td>Brady & Bryan</td><td>$23.00 / $20.50</td><td>28</td><td>19</td><td class="rate-low">67.9%</td><td>$11,018</td></tr><tr><td><strong>Truck 3</strong></td><td>Eli & Sebastian</td><td>$22.00 / $18.00</td><td>40</td><td>30</td><td class="rate-mid">75.0%</td><td>$18,987</td></tr><tr><td><strong>Truck 4</strong></td><td>Eugene & DJ</td><td>$24.50 / $18.50</td><td>44</td><td>33</td><td class="rate-mid">75.0%</td><td>$22,116</td></tr><tr><td><strong>Truck 5</strong></td><td>Larry & Diego</td><td>$18.50 / $22.00</td><td>41</td><td>36</td><td class="rate-high">87.8%</td><td>$19,408</td></tr><tr><td><strong>Truck 6</strong></td><td>German & Carlos</td><td>$18.00 / $22.00</td><td>43</td><td>35</td><td class="rate-mid">81.4%</td><td>$39,086</td></tr></tbody></table></div></div>
         </div>
+
+        <!-- ==================== SALES METRICS ==================== -->
         <div id="bdr" class="tab-content">
             <div class="stats-grid">
                 <div class="stat-card bdr-card"><div class="stat-label">Total Calls (Sep-Dec)</div><div class="stat-value">2,793</div></div>
@@ -527,26 +614,135 @@
 
             <div class="month-section" id="bdr-sep"><div class="month-header" onclick="toggleBdrMonth('bdr-sep')"><span class="month-title"><span class="month-toggle" id="bdr-sep-toggle">▼</span> September 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">112</div></div><div class="month-stat"><div class="month-stat-label">Answered</div><div class="month-stat-value success">81.25%</div></div><div class="month-stat"><div class="month-stat-label">Contracts</div><div class="month-stat-value">1</div></div><div class="month-stat"><div class="month-stat-label">ARR Added</div><div class="month-stat-value revenue">$988</div></div><div class="month-stat"><div class="month-stat-label">Avg Duration</div><div class="month-stat-value">1m 27s</div></div></div><div class="month-content" id="bdr-sep-content"><h4>Call Activity</h4><table><thead><tr><th>Agent</th><th>Calls</th><th>Avg Duration</th><th>Leads</th><th>Contracts</th><th>ARR</th></tr></thead><tbody><tr><td><span class="agent-badge agent-myles">Myles Marinez</span></td><td>108</td><td>1m 28s</td><td>93</td><td>0</td><td>$0</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>4</td><td>56s</td><td>2</td><td>0</td><td>$0</td></tr></tbody></table><h4 style="margin-top:24px">Contracts</h4><table><thead><tr><th>Account</th><th>Category</th><th>Set By</th><th>Closer</th><th>ARR</th></tr></thead><tbody><tr><td>Star Development</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Myles</td><td>$988</td></tr></tbody></table></div></div>
 
-            <div class="month-section" id="bdr-oct"><div class="month-header" onclick="toggleBdrMonth('bdr-oct')"><span class="month-title"><span class="month-toggle" id="bdr-oct-toggle">▼</span> October 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">1,164</div></div><div class="month-stat"><div class="month-stat-label">Answered</div><div class="month-stat-value success">~90%</div></div><div class="month-stat"><div class="month-stat-label">Contracts</div><div class="month-stat-value">16</div></div><div class="month-stat"><div class="month-stat-label">ARR Added</div><div class="month-stat-value revenue">$14,329</div></div><div class="month-stat"><div class="month-stat-label">Avg Duration</div><div class="month-stat-value">41s</div></div></div><div class="month-content" id="bdr-oct-content"><h4>Call Activity</h4><table><thead><tr><th>Agent</th><th>Calls</th><th>Avg Duration</th><th>Leads</th><th>Contracts</th><th>ARR</th></tr></thead><tbody><tr><td><span class="agent-badge agent-myles">Myles Marinez</span></td><td>754</td><td>30s</td><td>398</td><td>12</td><td>$9,527</td></tr><tr><td><span class="agent-badge agent-eric">Eric Mcdaniel</span></td><td>282</td><td>1m 11s</td><td>219</td><td>1</td><td>$502</td></tr><tr><td><span class="agent-badge agent-shania">Shania Abbasi</span></td><td>56</td><td>26s</td><td>49</td><td>0</td><td>$0</td></tr><tr><td><span class="agent-badge agent-piercyn">Morrena Torres</span></td><td>28</td><td>32s</td><td>25</td><td>0</td><td>$0</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>21</td><td>50s</td><td>17</td><td>0</td><td>$0</td></tr></tbody></table><h4 style="margin-top:24px">Contracts</h4><table><thead><tr><th>Account</th><th>Category</th><th>Set By</th><th>Closer</th><th>ARR</th></tr></thead><tbody><tr><td>White's Foodliner</td><td>Grocery</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$1,166</td></tr><tr><td>Butler One Stop</td><td>C-Store</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$515</td></tr><tr><td>Cici's Pizza - Roe</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$2,270</td></tr><tr><td>Lee's Summit Place</td><td>Retirement</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$980</td></tr><tr><td>Alpine Breeze</td><td>Retirement</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$980</td></tr><tr><td>Tiki Taco - Shawnee</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Eric</td><td>$2,340</td></tr><tr><td>Pizza Tascio (5 loc)</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$2,186</td></tr><tr><td>American Legion 499</td><td>Non-Profit</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$502</td></tr><tr><td>Sri's Kitchen</td><td>Food Truck</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Levi</td><td>$175</td></tr></tbody></table></div></div>
+            <div class="month-section" id="bdr-oct"><div class="month-header" onclick="toggleBdrMonth('bdr-oct')"><span class="month-title"><span class="month-toggle" id="bdr-oct-toggle">▼</span> October 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">1,164</div></div><div class="month-stat"><div class="month-stat-label">Answered</div><div class="month-stat-value success">~90%</div></div><div class="month-stat"><div class="month-stat-label">Contracts</div><div class="month-stat-value">16</div></div><div class="month-stat"><div class="month-stat-label">ARR Added</div><div class="month-stat-value revenue">$14,329</div></div><div class="month-stat"><div class="month-stat-label">Avg Duration</div><div class="month-stat-value">41s</div></div></div><div class="month-content" id="bdr-oct-content"><h4>Call Activity</h4><table><thead><tr><th>Agent</th><th>Calls</th><th>Avg Duration</th><th>Leads</th><th>Contracts</th><th>ARR</th></tr></thead><tbody><tr><td><span class="agent-badge agent-myles">Myles Marinez</span></td><td>754</td><td>30s</td><td>398</td><td>12</td><td>$9,527</td></tr><tr><td><span class="agent-badge agent-eric">Eric Mcdaniel</span></td><td>282</td><td>1m 11s</td><td>219</td><td>1</td><td>$502</td></tr><tr><td><span class="agent-badge agent-shania">Shania Abbasi</span></td><td>56</td><td>26s</td><td>49</td><td>0</td><td>$0</td></tr><tr><td><span class="agent-badge agent-morena">Morrena Torres</span></td><td>28</td><td>32s</td><td>25</td><td>0</td><td>$0</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>21</td><td>50s</td><td>17</td><td>0</td><td>$0</td></tr></tbody></table><h4 style="margin-top:24px">Contracts</h4><table><thead><tr><th>Account</th><th>Category</th><th>Set By</th><th>Closer</th><th>ARR</th></tr></thead><tbody><tr><td>White's Foodliner</td><td>Grocery</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$1,166</td></tr><tr><td>Butler One Stop</td><td>C-Store</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$515</td></tr><tr><td>Cici's Pizza - Roe</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$2,270</td></tr><tr><td>Lee's Summit Place</td><td>Retirement</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$980</td></tr><tr><td>Alpine Breeze</td><td>Retirement</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$980</td></tr><tr><td>Tiki Taco - Shawnee</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Eric</td><td>$2,340</td></tr><tr><td>Pizza Tascio (5 loc)</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$2,186</td></tr><tr><td>American Legion 499</td><td>Non-Profit</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$502</td></tr><tr><td>Sri's Kitchen</td><td>Food Truck</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Levi</td><td>$175</td></tr></tbody></table></div></div>
 
-            <div class="month-section" id="bdr-nov"><div class="month-header" onclick="toggleBdrMonth('bdr-nov')"><span class="month-title"><span class="month-toggle" id="bdr-nov-toggle">▼</span> November 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">1,057</div></div><div class="month-stat"><div class="month-stat-label">Answered</div><div class="month-stat-value">75.97%</div></div><div class="month-stat"><div class="month-stat-label">Contracts</div><div class="month-stat-value">11</div></div><div class="month-stat"><div class="month-stat-label">ARR Added</div><div class="month-stat-value revenue">$18,770</div></div><div class="month-stat"><div class="month-stat-label">Avg Duration</div><div class="month-stat-value">50s</div></div></div><div class="month-content" id="bdr-nov-content"><h4>Call Activity</h4><table><thead><tr><th>Agent</th><th>Calls</th><th>Avg Duration</th><th>Leads</th><th>Contracts</th><th>ARR</th></tr></thead><tbody><tr><td><span class="agent-badge agent-eric">Eric Mcdaniel</span></td><td>445</td><td>46s</td><td>344</td><td>2</td><td>$2,238</td></tr><tr><td><span class="agent-badge agent-myles">Myles Marinez</span></td><td>255</td><td>1m 1s</td><td>219</td><td>7</td><td>$13,226</td></tr><tr><td><span class="agent-badge agent-piercyn">Morrena Torres</span></td><td>194</td><td>50s</td><td>115</td><td>0</td><td>$0</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>144</td><td>46s</td><td>108</td><td>0</td><td>$0</td></tr></tbody></table><h4 style="margin-top:24px">Contracts</h4><table><thead><tr><th>Account</th><th>Category</th><th>Set By</th><th>Closer</th><th>ARR</th></tr></thead><tbody><tr><td>Speedy Corner LLC</td><td>C-Store</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$2,524</td></tr><tr><td>Tim's Pizza</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$1,166</td></tr><tr><td>Oak Pointe of Maryville</td><td>Retirement</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$1,238</td></tr><tr><td>Blue Springs Assembly</td><td>Non-Profit</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$535</td></tr><tr><td>Hope Chapel</td><td>Non-Profit</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$535</td></tr><tr><td>Culvers - Olathe</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$2,140</td></tr><tr><td>Barrio (3 loc)</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Eric</td><td>$5,988</td></tr><tr><td>Koehn Bakery</td><td>Bakery</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$575</td></tr></tbody></table></div></div>
+            <div class="month-section" id="bdr-nov"><div class="month-header" onclick="toggleBdrMonth('bdr-nov')"><span class="month-title"><span class="month-toggle" id="bdr-nov-toggle">▼</span> November 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">1,057</div></div><div class="month-stat"><div class="month-stat-label">Answered</div><div class="month-stat-value">75.97%</div></div><div class="month-stat"><div class="month-stat-label">Contracts</div><div class="month-stat-value">11</div></div><div class="month-stat"><div class="month-stat-label">ARR Added</div><div class="month-stat-value revenue">$18,770</div></div><div class="month-stat"><div class="month-stat-label">Avg Duration</div><div class="month-stat-value">50s</div></div></div><div class="month-content" id="bdr-nov-content"><h4>Call Activity</h4><table><thead><tr><th>Agent</th><th>Calls</th><th>Avg Duration</th><th>Leads</th><th>Contracts</th><th>ARR</th></tr></thead><tbody><tr><td><span class="agent-badge agent-eric">Eric Mcdaniel</span></td><td>445</td><td>46s</td><td>344</td><td>2</td><td>$2,238</td></tr><tr><td><span class="agent-badge agent-myles">Myles Marinez</span></td><td>255</td><td>1m 1s</td><td>219</td><td>7</td><td>$13,226</td></tr><tr><td><span class="agent-badge agent-morena">Morrena Torres</span></td><td>194</td><td>50s</td><td>115</td><td>0</td><td>$0</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>144</td><td>46s</td><td>108</td><td>0</td><td>$0</td></tr></tbody></table><h4 style="margin-top:24px">Contracts</h4><table><thead><tr><th>Account</th><th>Category</th><th>Set By</th><th>Closer</th><th>ARR</th></tr></thead><tbody><tr><td>Speedy Corner LLC</td><td>C-Store</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$2,524</td></tr><tr><td>Tim's Pizza</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$1,166</td></tr><tr><td>Oak Pointe of Maryville</td><td>Retirement</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$1,238</td></tr><tr><td>Blue Springs Assembly</td><td>Non-Profit</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$535</td></tr><tr><td>Hope Chapel</td><td>Non-Profit</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$535</td></tr><tr><td>Culvers - Olathe</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$2,140</td></tr><tr><td>Barrio (3 loc)</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Eric</td><td>$5,988</td></tr><tr><td>Koehn Bakery</td><td>Bakery</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$575</td></tr></tbody></table></div></div>
 
             <div class="month-section" id="bdr-dec"><div class="month-header" onclick="toggleBdrMonth('bdr-dec')"><span class="month-title"><span class="month-toggle" id="bdr-dec-toggle">▼</span> December 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">460</div></div><div class="month-stat"><div class="month-stat-label">Answered</div><div class="month-stat-value success">85.87%</div></div><div class="month-stat"><div class="month-stat-label">Contracts</div><div class="month-stat-value">15</div></div><div class="month-stat"><div class="month-stat-label">ARR Added</div><div class="month-stat-value revenue">$39,000</div></div><div class="month-stat"><div class="month-stat-label">Avg Duration</div><div class="month-stat-value">46s</div></div></div><div class="month-content" id="bdr-dec-content"><h4>Call Activity</h4><table><thead><tr><th>Agent</th><th>Calls</th><th>Avg Duration</th><th>Leads</th><th>Contracts</th><th>ARR</th></tr></thead><tbody><tr><td><span class="agent-badge agent-eric">Eric Mcdaniel</span></td><td>405</td><td>42s</td><td>265</td><td>6</td><td>$11,033</td></tr><tr><td><span class="agent-badge agent-myles">Myles Marinez</span></td><td>42</td><td>1m 25s</td><td>31</td><td>6</td><td>$21,031</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>10</td><td>1m 42s</td><td>8</td><td>0</td><td>$0</td></tr></tbody></table><h4 style="margin-top:24px">Contracts</h4><table><thead><tr><th>Account</th><th>Category</th><th>Set By</th><th>Closer</th><th>ARR</th></tr></thead><tbody><tr><td>Abelardo's - Liberty</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$2,008</td></tr><tr><td>Warrensburg Senior Center</td><td>Retirement</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$731</td></tr><tr><td>Marco's Pizza OP</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$1,418</td></tr><tr><td>Hy-Vee - 135th St</td><td>Grocery</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$12,783</td></tr><tr><td>Cameron Regional Medical</td><td>Hospital</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$1,460</td></tr><tr><td>Holiday Lanes</td><td>Activity</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$1,342</td></tr><tr><td>Sakura</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$2,500</td></tr><tr><td>Lulu's Thai (3 loc)</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-eric">Eric</span></td><td>Eric</td><td>$7,020</td></tr><tr><td>Abelardo's - Independence</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$2,008</td></tr><tr><td>Green Dirt on Oak</td><td>Restaurant/Bar</td><td><span class="agent-badge agent-piercyn">Piercyn</span></td><td>Piercyn</td><td>$2,920</td></tr><tr><td>Greater Faith Baptist</td><td>Non-Profit</td><td><span class="agent-badge agent-myles">Myles</span></td><td>Myles</td><td>$571</td></tr></tbody></table></div></div>
         </div>
+
+        <!-- ==================== OUTBOUND CALLS ==================== -->
+        <div id="outbound" class="tab-content">
+            <div style="margin-bottom: 12px; color: var(--text-muted); font-size: 0.8rem;">January 1, 2025 — February 13, 2026</div>
+
+            <!-- Funnel / Summary Stats -->
+            <div class="stats-grid-5">
+                <div class="stat-card bdr-card"><div class="stat-label">Total Outbound Calls</div><div class="stat-value">3,579</div></div>
+                <div class="stat-card bdr-card"><div class="stat-label">Forms Filled</div><div class="stat-value success">4,355</div></div>
+                <div class="stat-card bdr-card"><div class="stat-label">Contracts Sent</div><div class="stat-value">716</div></div>
+                <div class="stat-card bdr-card"><div class="stat-label">Contracts Completed</div><div class="stat-value success">256</div></div>
+                <div class="stat-card bdr-card"><div class="stat-label">Completion Rate</div><div class="stat-value revenue">35.8%</div><div class="stat-sub">of contracts sent</div></div>
+            </div>
+
+            <!-- Conversion Funnel -->
+            <h2 class="section-title">Conversion Funnel</h2>
+            <div class="funnel-grid">
+                <div class="funnel-step">
+                    <div class="funnel-label">Calls Made</div>
+                    <div class="funnel-value">3,579</div>
+                    <div class="funnel-rate">100%</div>
+                </div>
+                <div class="funnel-step">
+                    <div class="funnel-label">Forms Filled</div>
+                    <div class="funnel-value highlight">4,355</div>
+                    <div class="funnel-rate">121.7% of calls</div>
+                </div>
+                <div class="funnel-step">
+                    <div class="funnel-label">Contracts Sent</div>
+                    <div class="funnel-value">716</div>
+                    <div class="funnel-rate">16.4% of forms</div>
+                </div>
+                <div class="funnel-step">
+                    <div class="funnel-label">Contracts Completed</div>
+                    <div class="funnel-value highlight">256</div>
+                    <div class="funnel-rate">35.8% of sent</div>
+                </div>
+            </div>
+
+            <!-- Monthly Breakdown -->
+            <h2 class="section-title">Monthly Call Breakdown by Rep</h2>
+            <div class="expand-controls">
+                <button class="expand-btn" onclick="expandAllOutbound()">Expand All</button>
+                <button class="expand-btn" onclick="collapseAllOutbound()">Collapse All</button>
+            </div>
+            <div class="month-tabs">
+                <span class="month-tab" onclick="scrollToOutbound('ob-jan25')">Jan 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-feb25')">Feb 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-mar25')">Mar 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-apr25')">Apr 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-may25')">May 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-jun25')">Jun 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-jul25')">Jul 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-aug25')">Aug 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-sep25')">Sep 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-oct25')">Oct 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-nov25')">Nov 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-dec25')">Dec 25</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-jan26')">Jan 26</span>
+                <span class="month-tab" onclick="scrollToOutbound('ob-feb26')">Feb 26</span>
+            </div>
+
+            <!-- Jan 2025 -->
+            <div class="month-section" id="ob-jan25"><div class="month-header" onclick="toggleOutbound('ob-jan25')"><span class="month-title"><span class="month-toggle" id="ob-jan25-toggle">▼</span> January 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">3</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">3</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">1</div></div></div><div class="month-content" id="ob-jan25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr><td><span class="agent-badge agent-piercyn">Piercyn Charbonneau</span></td><td>3</td><td>32s</td><td>3</td></tr></tbody></table></div></div>
+
+            <!-- Feb 2025 -->
+            <div class="month-section" id="ob-feb25"><div class="month-header" onclick="toggleOutbound('ob-feb25')"><span class="month-title"><span class="month-toggle" id="ob-feb25-toggle">▼</span> February 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">0</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">—</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">0</div></div></div><div class="month-content" id="ob-feb25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr class="no-calls-row"><td colspan="4">No outbound calls this month</td></tr></tbody></table></div></div>
+
+            <!-- Mar 2025 -->
+            <div class="month-section" id="ob-mar25"><div class="month-header" onclick="toggleOutbound('ob-mar25')"><span class="month-title"><span class="month-toggle" id="ob-mar25-toggle">▼</span> March 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">5</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">4</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">1</div></div></div><div class="month-content" id="ob-mar25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr><td><span class="agent-badge agent-piercyn">Piercyn Charbonneau</span></td><td>5</td><td>37s</td><td>4</td></tr></tbody></table></div></div>
+
+            <!-- Apr 2025 -->
+            <div class="month-section" id="ob-apr25"><div class="month-header" onclick="toggleOutbound('ob-apr25')"><span class="month-title"><span class="month-toggle" id="ob-apr25-toggle">▼</span> April 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">0</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">—</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">0</div></div></div><div class="month-content" id="ob-apr25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr class="no-calls-row"><td colspan="4">No outbound calls this month</td></tr></tbody></table></div></div>
+
+            <!-- May 2025 -->
+            <div class="month-section" id="ob-may25"><div class="month-header" onclick="toggleOutbound('ob-may25')"><span class="month-title"><span class="month-toggle" id="ob-may25-toggle">▼</span> May 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">0</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">—</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">0</div></div></div><div class="month-content" id="ob-may25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr class="no-calls-row"><td colspan="4">No outbound calls this month</td></tr></tbody></table></div></div>
+
+            <!-- Jun 2025 -->
+            <div class="month-section" id="ob-jun25"><div class="month-header" onclick="toggleOutbound('ob-jun25')"><span class="month-title"><span class="month-toggle" id="ob-jun25-toggle">▼</span> June 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">0</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">—</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">0</div></div></div><div class="month-content" id="ob-jun25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr class="no-calls-row"><td colspan="4">No outbound calls this month</td></tr></tbody></table></div></div>
+
+            <!-- Jul 2025 -->
+            <div class="month-section" id="ob-jul25"><div class="month-header" onclick="toggleOutbound('ob-jul25')"><span class="month-title"><span class="month-toggle" id="ob-jul25-toggle">▼</span> July 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">3</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">3</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">3</div></div></div><div class="month-content" id="ob-jul25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr><td><span class="agent-badge agent-piercyn">Piercyn Charbonneau</span></td><td>1</td><td>0s</td><td>1</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>1</td><td>41s</td><td>1</td></tr><tr><td><span class="agent-badge agent-unknown">Unknown</span></td><td>1</td><td>42s</td><td>1</td></tr></tbody></table></div></div>
+
+            <!-- Aug 2025 -->
+            <div class="month-section" id="ob-aug25"><div class="month-header" onclick="toggleOutbound('ob-aug25')"><span class="month-title"><span class="month-toggle" id="ob-aug25-toggle">▼</span> August 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">3</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">2</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">2</div></div></div><div class="month-content" id="ob-aug25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr><td><span class="agent-badge agent-unknown">Unknown</span></td><td>2</td><td>0s</td><td>1</td></tr><tr><td><span class="agent-badge agent-fady">Fady Meekey</span></td><td>1</td><td>0s</td><td>1</td></tr></tbody></table></div></div>
+
+            <!-- Sep 2025 -->
+            <div class="month-section" id="ob-sep25"><div class="month-header" onclick="toggleOutbound('ob-sep25')"><span class="month-title"><span class="month-toggle" id="ob-sep25-toggle">▼</span> September 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">90</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">78</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">2</div></div></div><div class="month-content" id="ob-sep25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr><td><span class="agent-badge agent-myles">Myles Martinez</span></td><td>86</td><td>1m 21s</td><td>76</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>4</td><td>56s</td><td>2</td></tr></tbody></table></div></div>
+
+            <!-- Oct 2025 -->
+            <div class="month-section" id="ob-oct25"><div class="month-header" onclick="toggleOutbound('ob-oct25')"><span class="month-title"><span class="month-toggle" id="ob-oct25-toggle">▼</span> October 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">1,159</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">711</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">7</div></div></div><div class="month-content" id="ob-oct25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr><td><span class="agent-badge agent-myles">Myles Martinez</span></td><td>750</td><td>32s</td><td>382</td></tr><tr><td><span class="agent-badge agent-eric">Eric McDaniel</span></td><td>281</td><td>1m+</td><td>219</td></tr><tr><td><span class="agent-badge agent-shania">Shania Abbasi</span></td><td>56</td><td>26s</td><td>49</td></tr><tr><td><span class="agent-badge agent-morena">Morena Torres</span></td><td>28</td><td>32s</td><td>25</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>21</td><td>30s</td><td>17</td></tr><tr><td><span class="agent-badge agent-shairah">Shairah dela Pena</span></td><td>18</td><td>39s</td><td>15</td></tr><tr><td><span class="agent-badge agent-piercyn">Piercyn Charbonneau</span></td><td>5</td><td>44s</td><td>4</td></tr></tbody></table></div></div>
+
+            <!-- Nov 2025 -->
+            <div class="month-section" id="ob-nov25"><div class="month-header" onclick="toggleOutbound('ob-nov25')"><span class="month-title"><span class="month-toggle" id="ob-nov25-toggle">▼</span> November 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">1,084</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">827</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">6</div></div></div><div class="month-content" id="ob-nov25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr><td><span class="agent-badge agent-eric">Eric McDaniel</span></td><td>446</td><td>46s</td><td>345</td></tr><tr><td><span class="agent-badge agent-myles">Myles Martinez</span></td><td>281</td><td>1m+</td><td>242</td></tr><tr><td><span class="agent-badge agent-morena">Morena Torres</span></td><td>194</td><td>30s</td><td>116</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>144</td><td>46s</td><td>108</td></tr><tr><td><span class="agent-badge agent-shairah">Shairah dela Pena</span></td><td>14</td><td>1m 2s</td><td>11</td></tr><tr><td><span class="agent-badge agent-piercyn">Piercyn Charbonneau</span></td><td>5</td><td>52s</td><td>5</td></tr></tbody></table></div></div>
+
+            <!-- Dec 2025 -->
+            <div class="month-section" id="ob-dec25"><div class="month-header" onclick="toggleOutbound('ob-dec25')"><span class="month-title"><span class="month-toggle" id="ob-dec25-toggle">▼</span> December 2025</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">518</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">307</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">5</div></div></div><div class="month-content" id="ob-dec25-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr><td><span class="agent-badge agent-eric">Eric McDaniel</span></td><td>463</td><td>42s</td><td>265</td></tr><tr><td><span class="agent-badge agent-myles">Myles Martinez</span></td><td>42</td><td>1m 25s</td><td>31</td></tr><tr><td><span class="agent-badge agent-piercyn">Briggs McElwee</span></td><td>10</td><td>1m 42s</td><td>8</td></tr><tr><td><span class="agent-badge agent-piercyn">Piercyn Charbonneau</span></td><td>2</td><td>38s</td><td>2</td></tr><tr><td><span class="agent-badge agent-shania">Shania Abbasi</span></td><td>1</td><td>0s</td><td>1</td></tr></tbody></table></div></div>
+
+            <!-- Jan 2026 -->
+            <div class="month-section" id="ob-jan26"><div class="month-header" onclick="toggleOutbound('ob-jan26')"><span class="month-title"><span class="month-toggle" id="ob-jan26-toggle">▼</span> January 2026</span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">517</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">428</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">7</div></div></div><div class="month-content" id="ob-jan26-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr><td><span class="agent-badge agent-eric">Eric McDaniel</span></td><td>423</td><td>45s</td><td>349</td></tr><tr><td><span class="agent-badge agent-shairah">Shairah dela Pena</span></td><td>62</td><td>1m 55s</td><td>49</td></tr><tr><td><span class="agent-badge agent-kamran">Kamran Mehmood</span></td><td>22</td><td>31s</td><td>21</td></tr><tr><td><span class="agent-badge agent-piercyn">Piercyn Charbonneau</span></td><td>4</td><td>1m 9s</td><td>4</td></tr><tr><td><span class="agent-badge agent-myles">Myles Martinez</span></td><td>4</td><td>30s</td><td>3</td></tr><tr><td><span class="agent-badge agent-levi">Levi C</span></td><td>1</td><td>2m 38s</td><td>1</td></tr><tr><td><span class="agent-badge agent-shania">Shania Abbasi</span></td><td>1</td><td>0s</td><td>1</td></tr></tbody></table></div></div>
+
+            <!-- Feb 2026 (1-13) -->
+            <div class="month-section" id="ob-feb26"><div class="month-header" onclick="toggleOutbound('ob-feb26')"><span class="month-title"><span class="month-toggle" id="ob-feb26-toggle">▼</span> February 2026 <span style="color:var(--text-muted);font-size:0.75rem;margin-left:8px">(1st–13th)</span></span></div><div class="month-stats"><div class="month-stat"><div class="month-stat-label">Total Calls</div><div class="month-stat-value">64</div></div><div class="month-stat"><div class="month-stat-label">Unique Leads</div><div class="month-stat-value">57</div></div><div class="month-stat"><div class="month-stat-label">Reps Active</div><div class="month-stat-value">5</div></div></div><div class="month-content" id="ob-feb26-content"><table><thead><tr><th>Agent</th><th>Total Calls</th><th>Avg Duration</th><th>Unique Leads</th></tr></thead><tbody><tr><td><span class="agent-badge agent-shairah">Shairah dela Pena</span></td><td>32</td><td>1m 5s</td><td>29</td></tr><tr><td><span class="agent-badge agent-seth">Seth Chapsuis</span></td><td>24</td><td>1m 24s</td><td>22</td></tr><tr><td><span class="agent-badge agent-shania">Shania Abbasi</span></td><td>4</td><td>5s</td><td>2</td></tr><tr><td><span class="agent-badge agent-piercyn">Piercyn Charbonneau</span></td><td>2</td><td>4s</td><td>2</td></tr><tr><td><span class="agent-badge agent-eric">Eric McDaniel</span></td><td>2</td><td>0s</td><td>2</td></tr></tbody></table></div></div>
+
+        </div><!-- end outbound tab -->
     </div>
 
     <script>
-        function switchTab(tabId) {
+        function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
+            btn.classList.add('active');
         }
         function toggleMonth(id) {
             document.getElementById(id + '-content').classList.toggle('expanded');
             document.getElementById(id + '-toggle').classList.toggle('expanded');
         }
         function toggleBdrMonth(id) {
+            document.getElementById(id + '-content').classList.toggle('expanded');
+            document.getElementById(id + '-toggle').classList.toggle('expanded');
+        }
+        function toggleOutbound(id) {
             document.getElementById(id + '-content').classList.toggle('expanded');
             document.getElementById(id + '-toggle').classList.toggle('expanded');
         }
@@ -566,12 +762,25 @@
             document.querySelectorAll('#bdr .month-content').forEach(c => c.classList.remove('expanded'));
             document.querySelectorAll('#bdr .month-toggle').forEach(t => t.classList.remove('expanded'));
         }
+        function expandAllOutbound() {
+            document.querySelectorAll('#outbound .month-content').forEach(c => c.classList.add('expanded'));
+            document.querySelectorAll('#outbound .month-toggle').forEach(t => t.classList.add('expanded'));
+        }
+        function collapseAllOutbound() {
+            document.querySelectorAll('#outbound .month-content').forEach(c => c.classList.remove('expanded'));
+            document.querySelectorAll('#outbound .month-toggle').forEach(t => t.classList.remove('expanded'));
+        }
         function scrollToMonth(id) {
             document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
             document.getElementById(id + '-content').classList.add('expanded');
             document.getElementById(id + '-toggle').classList.add('expanded');
         }
         function scrollToBdrMonth(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            document.getElementById(id + '-content').classList.add('expanded');
+            document.getElementById(id + '-toggle').classList.add('expanded');
+        }
+        function scrollToOutbound(id) {
             document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
             document.getElementById(id + '-content').classList.add('expanded');
             document.getElementById(id + '-toggle').classList.add('expanded');
